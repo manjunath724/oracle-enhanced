@@ -713,7 +713,11 @@ module ActiveRecord
         columns.each do |col|
           value = attributes[col.name]
           # changed sequence of next two lines - should check if value is nil before converting to yaml
-          next if value.blank?
+          if klass.attribute_types[col.name].is_a?(Type::Serialized) && klass.attribute_types[col.name].coder == Coders::JSON
+            next if value.nil?  || (value == '')
+          else
+            next if value.blank?
+          end
           if klass.attribute_types[col.name].is_a? ActiveRecord::Type::Serialized
             value = klass.attribute_types[col.name].serialize(value)
           end
